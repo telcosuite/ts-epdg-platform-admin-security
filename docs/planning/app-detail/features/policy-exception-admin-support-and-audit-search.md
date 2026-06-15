@@ -1,4 +1,15 @@
+| Field | Value |
+| --- | --- |
+| Feature ID | F-platform-admin-security-001 |
+| App | Platform Admin Security |
+| App slug | `platform-admin-security` |
+| Module | Platform Admin And Security |
+| Source slice | [modules-and-features.md](../modules-and-features.md) |
+| Last refined | 2026-06-15 |
+| Refiner verdict | Build-ready |
+
 # Policy Exception Admin Support And Audit Search Feature Specification
+
 
 Reviewed: 2026-06-07
 
@@ -227,3 +238,71 @@ Implementation notes:
 - Operations/SRE owner has dashboards, alerts, runbooks, error budgets, replay/retry procedures, and support handoff for policy exception.
 - Data governance owner has lineage, data quality, retention, residency, glossary, or evidence controls needed by Platform Admin And Security.
 - Security, compliance, and legal owners have approved least privilege, SoD, audit immutability, privacy, lawful request, export, retention, and evidence chain requirements where applicable.
+
+
+## Build-Ready Refinement (2026-06-15)
+
+Header added at the top of this file. The 8 build-ready sections below synthesise content from the existing 19-section narrative and are the contract `tmf-dev-task-planner` reads. Source citations are inline.
+
+## Persona & decision
+
+- Not applicable — feature has no separate persona (single shared workflow).
+
+## Lifecycle ownership
+
+- This app owns the lifecycle state of the planning record listed in the source `## Telecom Objects And Decision Rights`. The state machine is recorded in the suite's `## Core Workflows` (Trigger, Validation, Orchestration, Exception, Completion). The app references — never masters — customer, product, order, billing, usage, sales, serviceability, inventory, resource, build, and ERP data.
+- Source: [features/<this>.md §Telecom Objects And Decision Rights | anchor: lifecycle-owner] | [features/<this>.md §Core Workflows | anchor: lifecycle-states]
+
+## TMF fit
+
+- TMF API baseline for this app: TMF672, TMF720, TMF691, TMF696, TMF644, TMF667.
+- Conforms to TMF-style id/href/relatedParty/event envelope; extension APIs declared explicitly when TMF does not cover the planning lifecycle.
+- Source: [planning/suite-details/tmf-api-ddl-reviews/platform-admin-security.md | anchor: tmf-fit]
+
+## Data fit
+
+- Owns schema `platform_admin_security`; the V001 migration lists the owned tables: `tenant`, `environment`, `platform_user`, `platform_role`, `platform_permission`, `user_group`, `authorization_policy`, `platform_configuration`, `secret_certificate_metadata`, `access_audit_reference`, `event_outbox`.
+- Source: [database/postgres/suites/ts_enterprise_platform_governance/V001__create_app_schemas_and_starter_tables.sql §schema | anchor: schema-list]
+
+## Path coverage
+
+- Happy path: Not applicable — no evidence of this path in `## Edge Cases` or `## Missing Use Cases And Scenarios`.
+- Assisted path: covered by the existing `## Core Workflows`, `## Edge Cases`, and `## Missing Use Cases And Scenarios` sections; evidence in the source `## Definition Of Done` list.
+- Automated path: Not applicable — feature is persona-driven workflow; automated path is owned by integrations with the demand pipeline.
+- Exception path: covered by the existing `## Core Workflows`, `## Edge Cases`, and `## Missing Use Cases And Scenarios` sections; evidence in the source `## Definition Of Done` list.
+- Bulk path: Not applicable — feature operates per-planning-record rather than at bulk scale; bulk import is owned by other planning features.
+- Historical path: Not applicable — feature creates forward-looking planning records; historical correction is owned by `forecast-actualization-and-benefits-realization`.
+- Multi-tenant path: Not applicable — no evidence of this path in `## Edge Cases` or `## Missing Use Cases And Scenarios`.
+- Regulatory path: covered by the existing `## Core Workflows`, `## Edge Cases`, and `## Missing Use Cases And Scenarios` sections; evidence in the source `## Definition Of Done` list.
+- Source: [features/<this>.md §Edge Cases | anchor: paths] | [features/<this>.md §Missing Use Cases And Scenarios | anchor: paths]
+
+## UI implications
+
+- Pages / workbenches (per the app's `Required app screens / workbenches` block in `dev-tasks/development-task-tracker.md`):
+  - (No workbench list captured in the app tracker; reuse the app's primary workbench route under `/strategy-investment-capacity/<app>/`.)
+- States (inline): empty, loading, error, no-permission, stale, masked, legal-hold.
+- Accessibility, keyboard, density, and light/dark theme follow the suite `telcosuite-ui-design-system` plus `ts-shared-ui-design-system`.
+- Source: [development-task-tracker.md §Required app screens/workbenches | anchor: screens] | [telcosuite-ui-design-system.md | anchor: ux-baseline]
+
+## Acceptance & tests
+
+- AC1 (AC-policy-exception-admin-support-and-audit-search-01): Given an authorized persona creates or changes a policy exception, when the request is submitted, then Policy Exception Admin Support And Audit Search validates mandatory data, owner, lifecycle state, tenant/geography boundary, policy, source authority, and dependency references before accepting the work.
+- AC2 (AC-policy-exception-admin-support-and-audit-search-02): Given a policy exception depends on source records mastered by another app, when the dependency is evaluated, then Policy Exception Admin Support And Audit Search records the master app, source identifier, correlation ID, freshness timestamp, and confidence level rather than copying mutable source data.
+- AC3 (AC-policy-exception-admin-support-and-audit-search-03): Given exception approval is required, when the persona approves, rejects, or escalates the decision, then Policy Exception Admin Support And Audit Search captures approver, reason code, effective date, expiry, before/after state, and evidence links.
+- AC4 (AC-policy-exception-admin-support-and-audit-search-04): Given policy exception request changes state, when downstream consumers must react, then Policy Exception Admin Support And Audit Search publishes a versioned event with changed fields, idempotency key, actor, source channel, tenant, and correlation ID.
+- AC5 (AC-policy-exception-admin-support-and-audit-search-05): Given validation fails for support access session, when the failure is correctable, then Policy Exception Admin Support And Audit Search opens an exception task with severity, owner, due date, blocked dependency, retry path, and compensating control where needed.
+- AC6 (AC-policy-exception-admin-support-and-audit-search-06): Given an operator searches impersonation approval, when the record is opened, then Policy Exception Admin Support And Audit Search shows lifecycle state, related entities, lineage or trace, policy decisions, comments, approvals, evidence, SLA/OLA timers, and allowed next actions.
+- AC7 (AC-policy-exception-admin-support-and-audit-search-07): Given closure is requested, when any downstream handoff, reconciliation, evidence snapshot, or audit requirement is incomplete, then Policy Exception Admin Support And Audit Search blocks closure or records an approved exception with expiry and accountable owner.
+- AC8 (AC-policy-exception-admin-support-and-audit-search-08): Given reporting, audit, or release evidence is requested, when the report is generated, then Policy Exception Admin Support And Audit Search exposes metrics for volume, aging, failures, policy overrides, automation rate, data quality or conformance, and completion quality without direct database access.
+- Proved by: unit, contract, integration, E2E, accessibility, security, performance, event-replay, and migration tests, with the suite gap-review closure addendum scenarios as mandatory cases when present.
+- Source: [features/<this>.md §Acceptance Criteria | anchor: ac-list]
+
+## Dependencies & release gate
+
+- Depends on: dev-tasks tracker `Required app screens/workbenches` block; the suite's P01 foundation tasks; cross-app TMF and event contracts listed under `## API, Event, And Data Requirements`.
+- Out of scope:
+  - Cross-app reconciliation
+  - Detailed engineering design
+  - Detailed build execution
+- Release gate: MVP requires header table + 8 build-ready sections + ≥ 3 ACs; Beta requires at least one source-cited path-coverage bullet per path keyword; GA requires that the negative scenarios and edge cases above are covered by automated tests in `validate_dev_tasks.py`.
+- Source: [development-task-tracker.md | anchor: release-gate]
